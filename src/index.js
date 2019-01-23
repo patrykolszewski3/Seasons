@@ -1,12 +1,44 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import './index.css';
-import App from './App';
-import * as serviceWorker from './serviceWorker';
+import SeasonDisplay from './SeasonDisplay';
+import Spinner from "./Spinner";
 
-ReactDOM.render(<App />, document.getElementById('root'));
+class App extends React.Component { //za pomoca React.component pozyczamy funkcjonalności z Reacta 
+    
+    state = { lat: null, errorMessage: '' };
 
-// If you want your app to work offline and load faster, you can change
-// unregister() to register() below. Note this comes with some pitfalls.
-// Learn more about service workers: http://bit.ly/CRA-PWA
-serviceWorker.unregister();
+    componentDidMount() {
+        window.navigator.geolocation.getCurrentPosition( //możemy załadować jakies dane z np. jakiegośAPI w kontruktorze, skoro wiemy ze bedziemy tego uzywac w aplikacji (pamietaj, ze to nie nie wyświetla jeszcze tego, to wszyskto jest w konsoli ewentualnie. to jest w pamięci!)
+            position => this.setState({ lat: position.coords.latitude }), //callback function - podajemy funkcje jako argument metody
+            err => this.setState({ errorMessage: err.message })
+            
+        );
+
+    }
+
+    renderContent() {
+        if (this.state.errorMessage && !this.state.lat) {
+            return <div>Error: {this.state.errorMessage}</div>;
+        }
+
+        if (!this.state.errorMessage && this.state.lat) {
+            return <SeasonDisplay lat={this.state.lat} />
+        }
+
+        return <Spinner message="Please accept location request"/>;
+      
+    }
+
+
+    //React says we have to define render!!
+    render() {
+        return (
+            <div className="border red"> {this.renderContent()} </div>
+        );
+    }
+}
+
+ReactDOM.render(
+    <App />,
+    document.querySelector('#root')
+);
